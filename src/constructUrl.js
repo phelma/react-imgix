@@ -117,12 +117,10 @@ function constructUrl(src, longOptions) {
     return "";
   }
 
-  const keys = Object.keys(longOptions);
-  const keysLength = keys.length;
-  let url = src + "?";
-  for (let i = 0; i < keysLength; i++) {
-    let key = keys[i];
-    let val = longOptions[key];
+  const query = Object.entries(longOptions).map(([key, val]) => {
+    if (!Array.isArray(val)) {
+      val = [val]
+    }
 
     if (PARAM_EXPANSION[key]) {
       key = PARAM_EXPANSION[key];
@@ -134,10 +132,10 @@ function constructUrl(src, longOptions) {
       val = Base64.encodeURI(val);
     }
 
-    url += key + "=" + encodeURIComponent(val) + "&";
-  }
+    return key + "=" + val.map(encodeURIComponent).join(',');
+  }).join('&')
 
-  return url.slice(0, -1);
+  return src + "?" + query;
 }
 
 function buildURLPublic(src, imgixParams = {}, options = {}) {
